@@ -1,0 +1,18 @@
+# rag-knowledge-agent — pinned to the verified-working version set.
+# (langchain 1.x relocated classic retrievers to langchain_classic; the code
+#  handles both old and new import paths.)
+
+langchain==1.4.0
+langchain-core==1.6.2
+langchain-community==0.4.2
+langchain-openai==1.6.0
+langchain-text-splitters==1.1.2
+langgraph==1.2.11
+chromadb==0.5.3
+onnxruntime==1.18.1
+numpy<2.0.0
+sentence-transformers>=2.7.0
+pypdf>=4.0.0
+unstructured>=0.14.0
+python-dotenv>=1.0.0
+pytest>=7.4.0
