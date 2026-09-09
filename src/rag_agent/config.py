@@ -26,13 +26,38 @@ def _env_int(key: str, default: int) -> int:
         return default
 
 
+def _env_float(key: str, default: float) -> float:
+    raw = os.getenv(key)
+    if raw is None or raw == "":
+        return default
+    try:
+        return float(raw)
+    except (TypeError, ValueError):
+        return default
+
+
+def _env_bool(key: str, default: bool) -> bool:
+    raw = os.getenv(key)
+    if raw is None or raw == "":
+        return default
+    return raw.strip().lower() in {"1", "true", "yes", "y", "on"}
+
+
 @dataclass
 class Settings:
-    """Runtime configuration for the RAG agent.
+    """Runtime configuration for the customer-service RAG agent.
 
     All fields default to values read from environment variables, but the
     dataclass can also be constructed directly (handy for tests and monkey
     patching).
+
+    Customer-service-specific settings:
+
+    * ``confidence_threshold`` — answers below this score fall back to a
+      "未找到明确答案，建议转人工客服" template instead of being shown.
+    * ``enable_citation`` — whether the generation prompt enforces the
+      ``**参考来源**`` block and the citation consistency check.
+    * ``show_trace`` — default value for the ``ask --show-trace`` CLI flag.
     """
 
     openai_api_key: str = field(default_factory=lambda: _env("OPENAI_API_KEY", ""))
@@ -61,6 +86,17 @@ class Settings:
     chunk_overlap: int = field(default_factory=lambda: _env_int("CHUNK_OVERLAP", 50))
     top_k: int = field(default_factory=lambda: _env_int("TOP_K", 4))
     max_retries: int = field(default_factory=lambda: _env_int("MAX_RETRIES", 2))
+
+    # --- customer-service extension ------------------------------------- #
+    confidence_threshold: float = field(
+        default_factory=lambda: _env_float("CONFIDENCE_THRESHOLD", 0.6)
+    )
+    enable_citation: bool = field(
+        default_factory=lambda: _env_bool("ENABLE_CITATION", True)
+    )
+    show_trace: bool = field(
+        default_factory=lambda: _env_bool("SHOW_TRACE", False)
+    )
 
 
 def get_settings() -> Settings:

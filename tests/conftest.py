@@ -169,3 +169,32 @@ def in_memory_vectorstore(fake_embeddings):
         embedding_function=fake_embeddings,
         collection_name=unique_name,
     )
+
+
+@pytest.fixture
+def cs_vectorstore_lookup(fake_embeddings):
+    """Per-category in-memory Chroma stores for the customer-service agent.
+
+    Returns a callable ``(category: str) -> Chroma``. The same in-memory
+    chromadb client backs every store, but each category lands in its own
+    isolated collection (named ``cs_<category>_<uuid>``) so we can ingest
+    different documents into ``product`` / ``policy`` / ``sop`` / ``general``
+    and verify the router actually picks the right one.
+    """
+    import uuid
+
+    from langchain_community.vectorstores import Chroma
+
+    stores: dict[str, Chroma] = {}
+
+    def _get(category: str):
+        cat = category or "general"
+        if cat not in stores:
+            stores[cat] = Chroma(
+                persist_directory=None,
+                embedding_function=fake_embeddings,
+                collection_name=f"cs_{cat}_{uuid.uuid4().hex}",
+            )
+        return stores[cat]
+
+    return _get

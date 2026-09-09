@@ -6,6 +6,10 @@
 chroma_db/
 *.sqlite3
 
+# Customer-service runtime artifacts
+reports/
+logs/
+
 # Python
 __pycache__/
 *.py[cod]
